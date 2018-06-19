@@ -37,6 +37,15 @@ add_waypoint_div <- function(id) {
     })
 }
 
+download_handler <- function(file_prefix, last_updated_timestamp, data) {
+    
+    downloadHandler(filename = paste0(file_prefix, '_', create_timestamp(last_updated_timestamp), '.csv'),
+                    content = function(file) {
+                        write.csv(data, file, row.names = FALSE)
+                    })
+    
+}
+
 toggle_markers <- function(session, selected_id, ids) {
     ids <- ids[ids != selected_id]
     lapply(ids, function(x) updatePrettyToggle(session, x, value = FALSE))
@@ -96,7 +105,8 @@ test_route <- function(session, origin, destination, waypoints, key = test_key) 
                 travel_time      <- request$Time / 60 %>% round(digits = 2)
                 # TODO: customize popup content
                 leafletProxy('map') %>% addPolylines(lng = decoded_polyline$lon,
-                                                     lat = decoded_polyline$lat, layerId = 'route', popup = paste0('Travel Time: ', travel_time, ' minutes'))
+                                                     lat = decoded_polyline$lat, layerId = 'route',
+                                                     popup = paste0('Travel Time: ', travel_time, ' minutes'))
                 success <- TRUE
             } else {
                 sendSweetAlert(session, title = '', text = tags$span('Request failed. Google Directions API returned the following status code: ', request$Status),
@@ -114,7 +124,6 @@ test_route <- function(session, origin, destination, waypoints, key = test_key) 
 
 validate_inputs <- function(session, start_date, end_date, time_period_1, time_period_2, freq, days_of_week,
                             traffic_model, tz) {
-    
     valid_inputs <- FALSE
     if(start_date <= end_date) {
         date_range <- seq(ymd(start_date), ymd(end_date), by = '1 day')
@@ -141,6 +150,36 @@ validate_inputs <- function(session, start_date, end_date, time_period_1, time_p
         
     }
     return(valid_inputs)
+}
+
+confirm_requests <- function(start_date, end_date, time_period_1, time_period_2, interval, days_of_week,
+                             traffic_model, tz, coords, key, session) {
+    
+    tz       <- str_replace_all(tz, ' ', '_')
+    date_seq <- seq(ymd(start_date, tz = tz), ymd(end_date, tz = tz), by = '1 day')
+    date_seq <- date_seq[weekdays(date_seq) %in% days_of_week]
+    time_seq <- lapply(date_seq, function(x) { seq(ymd_hms(paste0(x, ' ', time_period_1[1], ':00:00'), tz = tz),
+                                                   ymd_hms(paste0(x, ' ', time_period_1[2], ':00:00'), tz = tz),
+                                                   by = interval) })
+    time_seq        <- do.call('c', time_seq)
+    if(time_period_2 != '') {
+        time_seq_2 <- lapply(date_seq, function(x) { seq(ymd_hms(paste0(x, ' ', time_period_2[1], ':00:00'), tz = tz),
+                                                         ymd_hms(paste0(x, ' ', time_period_2[2], ':00:00'), tz = tz),
+                                                         by = interval) })
+        time_seq_2 <- do.call('c', time_seq_2)
+        time_seq   <- c(time_seq, time_seq_2) %>% sort()
+    }
+    coords          <- str_replace_all(coords, ' ', '')
+    od_pairs        <- data.frame('o' = coords[1:(length(coords) - 1)], 'd' = coords[2:length(coords)],
+                                  segment = seq(1:(length(coords) - 1)), stringsAsFactors = FALSE)
+    cross_df        <- crossing(od_pairs, time_seq, traffic_model)
+    names(cross_df) <- c('o', 'd', 'segment', 'departure_time', 'traffic_model')
+    
+    confirm_text <- paste0('You are about to submit a request for ', format(nrow(cross_df), big.mark = ',', scientific = FALSE),
+                           ' travel times. The maximum charge against your API key will be $',
+                           format((0.5 * nrow(cross_df)) / 100, digits = 2, decimal.mark = '.', big.mark = ',', scientific = FALSE),
+                           '. \nAre you sure you wish to proceed?')
+    confirmSweetAlert(session, 'confirm', text = confirm_text, type = 'warning', danger_mode = TRUE, html = TRUE)
     
 }
 

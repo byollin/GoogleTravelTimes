@@ -9,11 +9,6 @@ source('R/gmapdirections.R')
 travel_times <- function(start_date, end_date, time_period_1, time_period_2, interval, days_of_week,
                          traffic_model, tz, coords, key, session) {
     
-    progress <- Progress$new(session)
-    on.exit(progress$close())
-    
-    progress$set(message = 'Initiating requests. This may take a while...')
-    
     get_departure_offset <- function(i, cum_tt, res) {
         if (i == 1) {
             cum_tt + 0
@@ -45,7 +40,7 @@ travel_times <- function(start_date, end_date, time_period_1, time_period_2, int
                                   segment = seq(1:(length(coords) - 1)), stringsAsFactors = FALSE)
     cross_df        <- crossing(od_pairs, time_seq, traffic_model)
     names(cross_df) <- c('o', 'd', 'segment', 'departure_time', 'traffic_model')
-    
+
     indx <- select(cross_df, traffic_model, departure_time) %>%
                 group_by(traffic_model, departure_time) %>%
                 arrange(traffic_model, departure_time) %>% distinct()
@@ -58,12 +53,11 @@ travel_times <- function(start_date, end_date, time_period_1, time_period_2, int
     cores   <- detectCores()
     cluster <- makeCluster(cores[1] - 1, outfile = '')
     registerDoParallel(cluster)
-    
-    progress$set(message = 'Requesting...')
+    on.exit(stopCluster(cluster))
     
     num_error   <- 0
     par_results <- foreach(i = 1:nrow(indx), .combine = 'rbind', .packages = c('dplyr', 'xml2', 'RCurl', 'foreach', 'shiny'),
-                           .errorhandling = 'stop', .export = c('gmapsdirection', 'session', 'progress')) %dopar% {
+                           .errorhandling = 'stop', .export = c('gmapsdirection')) %dopar% {
         
         curr_model   <- indx[[i, 1]]
         curr_time    <- indx[[i, 2]]
@@ -101,8 +95,6 @@ travel_times <- function(start_date, end_date, time_period_1, time_period_2, int
             c(row, computed_departure = departure, status = status, tt = tt, distance = distance)
         }
     }
-    
-    stopCluster(cluster)
     
     tt <- as.data.frame(par_results) %>% apply(2, unlist, use.names = FALSE) %>% 
               as.data.frame(row.names = FALSE, stringsAsFactors = FALSE) %>% as_tibble()

@@ -161,32 +161,36 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
         
         menuItem(text = 'Step 3: Verify and Submit Request', icon = icon('check'),
                  
-            br(),
-            
-            column(12,
-                 
-            div(style = 'display: inline-block; vertical-align:top; width: 154px',
-            
-                actionBttn('cost_estimate', 'Estimate Cost', icon = icon('usd'), style = 'simple',
-                           color = 'danger', block = TRUE)
-                
-            ),
-            
-            div(style = 'display: inline-block; vertical-align:top; width: 154px',
-                actionBttn('review_requests', 'Review Requests', icon = icon('table'), style = 'simple',
-                           color = 'danger', block = TRUE)
-            )),
-            
-            br(),
+            # br(),
+            # 
+            # column(12,
+            #      
+            # div(style = 'display: inline-block; vertical-align:top; width: 154px',
+            # 
+            #     actionBttn('cost_estimate', 'Estimate Cost', icon = icon('usd'), style = 'simple',
+            #                color = 'danger', block = TRUE)
+            #     
+            # ),
+            # 
+            # div(style = 'display: inline-block; vertical-align:top; width: 154px',
+            #     actionBttn('review_requests', 'Review Requests', icon = icon('table'), style = 'simple',
+            #                color = 'danger', block = TRUE)
+            # )),
+            # 
+            # br(),
             
             div(passwordInput('api_key', label = 'API key: ', width = '100%'), style = 'margin-top:8px;'),
             
-            column(12,div(id = 'api_message', style = 'margin-top: -6px;', p('Note: your requests are made securely over HTTPS.')) %>% hidden()),
+            column(12,div(id = 'api_message', style = 'margin-top: -12px;', p('Note: your requests are made securely over HTTPS.')) %>% hidden()),
             
             column(12,
             actionBttn('submit', 'Submit Requests', style = 'simple', color = 'danger', block = TRUE),
             
-            br())
+            br(),
+            
+            div(id = 'download_div', downloadLink('download', 'Download Results'), style = 'margin-bottom: 10px;') %>% hidden()
+            
+            )
         
         ))
         
