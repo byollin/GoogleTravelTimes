@@ -26,11 +26,13 @@ shinyServer(function(input, output, session) {
         
         leaflet::leaflet(options = leafletOptions(minZoom = 4, maxZoom = 18,
                                                   zoomControl = FALSE)) %>%
-            addTiles(urlTemplate = 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png') %>%
+            addTiles(urlTemplate = 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+                     attribution = '<a href="https://maps.wikimedia.org/" title="Wikimedia Maps Beta">Wikimedia Maps</a> | Map data provided by <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap Contributors">OpenStreetMap © Contributors</a>') %>%
             setView(lng = -122.239144, lat = 47.57552, zoom = 12) %>%
             addMiniMap(position = 'bottomleft',
                        tiles = 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
                        toggleDisplay = TRUE) %>% onRender(js_code)
+            
         
     })
     
@@ -414,6 +416,18 @@ shinyServer(function(input, output, session) {
             shinyjs::hide('spinner')
             
         })
+        
+    })
+    
+    observeEvent(input$contact, {
+        
+        sendSweetAlert(
+            session = session,
+            title = NULL,
+            text = tags$span(style = 'text-align: left;',
+                             tags$h3("Contact", style = "color: #d73926;")),
+            html = TRUE, btn_labels = c('OK')
+        )
         
     })
     

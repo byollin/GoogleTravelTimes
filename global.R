@@ -10,8 +10,9 @@ library(stringr)
 source('R/gmapsroute.R')
 source('R/get_travel_times.R')
 
-test_key <- readLines('_conf/api_key.txt')
-tzs      <- OlsonNames() %>% str_replace_all('_', ' ')
+test_key         <- readLines('_conf/api_key.txt')
+tzs              <- OlsonNames() %>% str_replace_all('_', ' ')
+price_multiplier <- 0.5
 
 add_waypoint_div <- function(id) {
     insertUI(selector = '#add_waypoint', where = 'beforeBegin', ui = {
@@ -102,7 +103,7 @@ test_route <- function(session, origin, destination, waypoints, key = test_key) 
         if(!'try-error' %in% class(request)) {
             if(request$Status == 'OK') {
                 decoded_polyline <- decode_pl(request$Route)
-                travel_time      <- request$Time / 60 %>% round(digits = 2)
+                travel_time      <- round(request$Time / 60, digits = 0)
                 # TODO: customize popup content
                 leafletProxy('map') %>% addPolylines(lng = decoded_polyline$lon,
                                                      lat = decoded_polyline$lat, layerId = 'route',
@@ -175,9 +176,10 @@ confirm_requests <- function(start_date, end_date, time_period_1, time_period_2,
     cross_df        <- crossing(od_pairs, time_seq, traffic_model)
     names(cross_df) <- c('o', 'd', 'segment', 'departure_time', 'traffic_model')
     
+    price <- format(price_multiplier * ceiling(nrow(cross_df) / 1000), digits = 2, nsmall = 2, decimal.mark = '.', big.mark = ',', scientific = FALSE)
+    
     confirm_text <- paste0('You are about to submit a request for ', format(nrow(cross_df), big.mark = ',', scientific = FALSE),
-                           ' travel times. The maximum charge against your API key will be $',
-                           format((0.5 * nrow(cross_df)) / 100, digits = 2, decimal.mark = '.', big.mark = ',', scientific = FALSE),
+                           ' travel times. The maximum charge against your API key will be $', price,
                            '. \nAre you sure you wish to proceed?')
     confirmSweetAlert(session, 'confirm', text = confirm_text, type = 'warning', danger_mode = TRUE, html = TRUE)
     
