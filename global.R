@@ -14,6 +14,15 @@ test_key         <- readLines('_conf/api_key.txt')
 tzs              <- OlsonNames() %>% str_replace_all('_', ' ')
 price_multiplier <- 0.5
 
+contact = data.frame('Name' = c('<b>Ryan Avery</b>', '<b>Nicholas Richter</b>', '<b>Bethany Yollin</b>', '<b>Yihong Zou</b>'),
+                     'Title' = c('Lead Transportation Planner', 'Systems Analyst', 'Data Scientist', 'Transportation Planner'),
+                     'Email' = c(paste(tags$a(href="mailto:ryan.avery@wsp.com", target="_blank", icon('envelope'))),
+                                 paste(tags$a(href="mailto:nicholas.richter@wsp.com", target="_blank", icon('envelope'))),
+                                 paste(tags$a(href="mailto:bethany.yollin@wsp.com", target="_blank", icon('envelope'))),
+                                 paste(tags$a(href="mailto:yihong.zou@wsp.com", target="_blank", icon('envelope')))
+                     )
+)
+
 add_waypoint_div <- function(id) {
     insertUI(selector = '#add_waypoint', where = 'beforeBegin', ui = {
         div(id = paste0('waypoint_div_', id),
@@ -104,10 +113,10 @@ test_route <- function(session, origin, destination, waypoints, key = test_key) 
             if(request$Status == 'OK') {
                 decoded_polyline <- decode_pl(request$Route)
                 travel_time      <- round(request$Time / 60, digits = 0)
-                # TODO: customize popup content
+                popup_content    <- paste0('<b>Travel Time: </b>', travel_time, ' minutes')
                 leafletProxy('map') %>% addPolylines(lng = decoded_polyline$lon,
                                                      lat = decoded_polyline$lat, layerId = 'route',
-                                                     popup = paste0('Travel Time: ', travel_time, ' minutes'))
+                                                     popup = popup_content)
                 success <- TRUE
             } else {
                 sendSweetAlert(session, title = '', text = tags$span('Request failed. Google Directions API returned the following status code: ', request$Status),
@@ -176,11 +185,14 @@ confirm_requests <- function(start_date, end_date, time_period_1, time_period_2,
     cross_df        <- crossing(od_pairs, time_seq, traffic_model)
     names(cross_df) <- c('o', 'd', 'segment', 'departure_time', 'traffic_model')
     
-    price <- format(price_multiplier * ceiling(nrow(cross_df) / 1000), digits = 2, nsmall = 2, decimal.mark = '.', big.mark = ',', scientific = FALSE)
+    price <- format(price_multiplier * ceiling(nrow(cross_df) / 1000), digits = 2, nsmall = 2,
+                    decimal.mark = '.', big.mark = ',', scientific = FALSE)
     
-    confirm_text <- paste0('You are about to submit a request for ', format(nrow(cross_df), big.mark = ',', scientific = FALSE),
-                           ' travel times. The maximum charge against your API key will be $', price,
-                           '. \nAre you sure you wish to proceed?')
+    confirm_text <- paste0('You are about to submit a request for ', format(nrow(cross_df),
+                                                                            big.mark = ',',
+                                                                            scientific = FALSE),
+                           ' travel times. The maximum charge against your API key will be $',
+                           price, '. \nAre you sure you wish to proceed?')
     confirmSweetAlert(session, 'confirm', text = confirm_text, type = 'warning', danger_mode = TRUE, html = TRUE)
     
 }

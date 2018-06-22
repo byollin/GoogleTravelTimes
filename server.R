@@ -89,7 +89,7 @@ shinyServer(function(input, output, session) {
                 lng <- lng[[1]][2] %>% as.numeric()
                 
                 leafletProxy('map') %>% addAwesomeMarkers(lng = lng, lat = lat, layerId = waypoint_layer_id,
-                                                          icon = waypoint_icon)
+                                                          icon = waypoint_icon, popup = paste0(lat,', ', lng))
                 leafletProxy('map') %>% removeShape('route')
                 
             } else {
@@ -198,7 +198,7 @@ shinyServer(function(input, output, session) {
             lng <- lng[[1]][2] %>% as.numeric()
             
             leafletProxy('map') %>% addAwesomeMarkers(lng = lng, lat = lat, layerId = 'origin',
-                                                      icon = origin_icon)
+                                                      icon = origin_icon, popup = paste0(lat,', ', lng))
             leafletProxy('map') %>% removeShape('route')
             
         } else {
@@ -220,7 +220,7 @@ shinyServer(function(input, output, session) {
             lng <- lng[[1]][2] %>% as.numeric()
             
             leafletProxy('map') %>% addAwesomeMarkers(lng = lng, lat = lat, layerId = 'destination',
-                                                      icon = destination_icon)
+                                                      icon = destination_icon, popup = paste0(lat,', ', lng))
             leafletProxy('map') %>% removeShape('route')
             
         } else {
@@ -401,7 +401,7 @@ shinyServer(function(input, output, session) {
             results$data <- tt
             shinyjs::show('download_div')
             output$download <- downloadHandler(filename = paste0('results', Sys.time() %>% as.numeric(), '.csv'),
-                                               content = function(file) { write.csv(results$data, file) })
+                                               content = function(file) { write.csv(results$data, file, row.names = FALSE) })
             progress$status$set(message = 'Complete!')
             Sys.sleep(2)
         } else {
@@ -421,12 +421,14 @@ shinyServer(function(input, output, session) {
     
     observeEvent(input$contact, {
         
-        sendSweetAlert(
-            session = session,
-            title = NULL,
+        sendSweetAlert(session = session, title = NULL,
             text = tags$span(style = 'text-align: left;',
-                             tags$h3("Contact", style = "color: #d73926;")),
-            html = TRUE, btn_labels = c('OK')
+                             tags$h3("Contact Us", style = "color: #d73926;"),
+                             tags$div(renderDataTable(contact, escape = F,
+                                                      options = list(paging = FALSE,
+                                                                     searching = FALSE,
+                                                                     dom = 't')))),
+            html = T, btn_labels = c('Close')
         )
         
     })

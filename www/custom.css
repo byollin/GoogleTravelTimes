@@ -6,6 +6,23 @@
     color: white;
 }
 
+.dataTables_wrapper table thead{
+    display:none;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 4px;
+}
+
+.leaflet-popup-content {
+    margin: 8px 18px;
+}
+
+.leaflet-container {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 200;
+}
+
 .bttn-gradient.bttn-danger, .bttn-simple.bttn-danger {
     background: #d73926;
 }

@@ -6,6 +6,7 @@ library(doParallel)
 
 source('R/gmapdirections.R')
 
+# TODO: add parameter to handle non-segmented requests
 travel_times <- function(start_date, end_date, time_period_1, time_period_2, interval, days_of_week,
                          traffic_model, tz, coords, key, session) {
     

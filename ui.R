@@ -8,12 +8,9 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
                     
         tags$li(class = "dropdown", actionLink('contact', label = '',
                                                icon = icon('envelope-o', class = 'fa-lg alignleft'))),
-        
-        tags$li(class = "dropdown", actionLink('about', label = '',
-                                               icon = icon('question-circle-o', class = 'fa-lg alignleft'))),
                     
         tags$li(class = "dropdown", tags$a(href="https://www.wsp.com/en-GL", target="_blank",
-                                           tags$img(height = "20px", alt="wsp_logo", src="wsp_logo.png")))                
+                                           tags$img(height = "20px", alt="WSP USA ©", src="wsp_logo.png")))                
                     
     ),
                     
@@ -188,7 +185,7 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
             
             br(),
             
-            div(id = 'download_div', downloadLink('download', 'Download Results'), style = 'margin-bottom: 10px;') %>% hidden()
+            div(id = 'download_div', downloadLink('download', 'Download Results'), style = 'margin-bottom: 16px;') %>% hidden()
             
             )
         
@@ -221,6 +218,9 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
                 div() %>% withSpinner(type = 8, proxy.height = '400px', color = '#d73926')
                        
             ))
-        )
+        ),
+        
+        tags$img(height = "10px", alt="Google ©", src="powered_by_google_on_white.png",
+                 style = 'position: absolute; right: 8px; bottom: 20px')
     )
 )
