@@ -33,7 +33,7 @@ travel_times <- function(start_date, end_date, time_period_1, time_period_2, int
         time_seq_2 <- lapply(date_seq, function(x) { seq(ymd_hms(paste0(x, ' ', time_period_2[1], ':00:00'), tz = tz),
                                                          ymd_hms(paste0(x, ' ', time_period_2[2], ':00:00'), tz = tz),
                                                          by = interval) })
-        time_seq_2 <- do.call('c', time_seq)
+        time_seq_2 <- do.call('c', time_seq_2)
         time_seq   <- c(time_seq, time_seq_2) %>% sort()
     }
     coords          <- str_replace_all(coords, ' ', '')

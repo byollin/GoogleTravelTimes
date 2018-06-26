@@ -6,6 +6,7 @@ RUN apt-get update \
 	libssl-dev \
     libgdal-dev \
 	libproj-dev \
+	libjq-dev \
 	nginx
 
 # install stable packages from CRAN
@@ -23,7 +24,7 @@ RUN R -e "install.packages('devtools')" && \
 	R -e "install.packages('htmlwidgets')" && \
 	R -e "install.packages('shinyBS')" && \
 	R -e "install.packages('shinydashboard')" && \
-	R -e "install.packages('shinycssloaders')" &&
+	R -e "install.packages('shinycssloaders')"
 
 # install development versions from GitHub
 RUN R -e "devtools::install_github('daattali/shinyjs')" && \

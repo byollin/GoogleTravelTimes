@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 _conf/api_key.txt
+*.tar.gz
