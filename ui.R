@@ -1,5 +1,7 @@
-library(shinydashboard)
-library(lubridate)
+suppressWarnings(suppressMessages({
+    library(shinydashboard)
+    library(lubridate)
+}))
 
 dashboardPage(skin = 'red', title = 'Google Travel Times',
               

@@ -11,8 +11,10 @@
 #
 #-----------------------------------------------------------------------------------------------------------------------
 
-library(xml2)
-library(RCurl)
+suppressWarnings(suppressMessages({
+    library(xml2)
+    library(RCurl)
+}))
 
 gmapsdirection = function(origin, destination, waypoints = '', mode = 'driving', key = '', alternatives = FALSE, avoid = '',
                           departure = 'now', dep_date = '', dep_time = '', traffic_model = 'best_guess', arrival = '',

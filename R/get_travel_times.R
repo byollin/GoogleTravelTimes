@@ -1,8 +1,10 @@
-library(lubridate)
-library(dplyr)
-library(tidyr)
-library(foreach)
-library(doParallel)
+suppressWarnings(suppressMessages({
+    library(lubridate)
+    library(dplyr)
+    library(tidyr)
+    library(foreach)
+    library(doParallel)
+}))
 
 source('R/gmapdirections.R')
 

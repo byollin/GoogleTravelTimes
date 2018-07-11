@@ -1,5 +1,7 @@
-library(xml2)
-library(RCurl)
+suppressWarnings(suppressMessages({
+    library(xml2)
+    library(RCurl)
+}))
 
 gmapsroute = function(origin, destination, waypoints = '', mode = 'driving', key = '',
                       alternatives = FALSE, avoid = '', departure = 'now', dep_date = '',
