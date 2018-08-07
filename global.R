@@ -15,7 +15,7 @@ source('R/get_travel_times.R')
 
 test_key         <- readLines('_conf/api_key.txt')
 tzs              <- OlsonNames() %>% str_replace_all('_', ' ')
-price_multiplier <- 0.5
+price_multiplier <- 5
 
 contact = data.frame('Name' = c('<b>Ryan Avery</b>', '<b>Nicholas Richter</b>', '<b>Bethany Yollin</b>', '<b>Yihong Zou</b>'),
                      'Title' = c('Lead Transportation Planner', 'Systems Analyst', 'Data Scientist', 'Transportation Planner'),
