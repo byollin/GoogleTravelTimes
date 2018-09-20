@@ -138,29 +138,34 @@ test_route <- function(session, origin, destination, waypoints, key = test_key) 
 validate_inputs <- function(session, start_date, end_date, time_period_1, time_period_2, freq, days_of_week,
                             traffic_model, tz) {
     valid_inputs <- FALSE
-    if(start_date <= end_date) {
-        date_range <- seq(ymd(start_date), ymd(end_date), by = '1 day')
-        if(!length(tz) == 0) {
-            if(!is.null(traffic_model)) {
-                if(TRUE %in% (days_of_week %in% weekdays(date_range))) {
-                    valid_inputs <- TRUE
+    if(start_date > Sys.time() | end_date > Sys.time()) {
+        if(start_date <= end_date) {
+            date_range <- seq(ymd(start_date), ymd(end_date), by = '1 day')
+            if(!length(tz) == 0) {
+                if(!is.null(traffic_model)) {
+                    if(TRUE %in% (days_of_week %in% weekdays(date_range))) {
+                        valid_inputs <- TRUE
+                    } else {
+                        sendSweetAlert(session, title = '', text = tags$span(tags$span('Date range must contain selected days of the week.')),
+                                       type = 'error', btn_labels = 'OK', html = TRUE)
+                    }
                 } else {
-                    sendSweetAlert(session, title = '', text = tags$span(tags$span('Date range must contain selected days of the week.')),
+                    sendSweetAlert(session, title = '', text = tags$span(tags$span('At least one traffic model must be selected.')),
                                    type = 'error', btn_labels = 'OK', html = TRUE)
                 }
             } else {
-                sendSweetAlert(session, title = '', text = tags$span(tags$span('At least one traffic model must be selected.')),
+                sendSweetAlert(session, title = '', text = tags$span(tags$span('A time zone must be selected.')),
                                type = 'error', btn_labels = 'OK', html = TRUE)
             }
+            
         } else {
-            sendSweetAlert(session, title = '', text = tags$span(tags$span('A time zone must be selected.')),
+            sendSweetAlert(session, title = '', text = tags$span(tags$span('End date must be later than start date.')),
                            type = 'error', btn_labels = 'OK', html = TRUE)
         }
         
     } else {
-        sendSweetAlert(session, title = '', text = tags$span(tags$span('End date must be later than start date.')),
+        sendSweetAlert(session, title = '', text = tags$span(tags$span('Date range must be sometime in the future.')),
                        type = 'error', btn_labels = 'OK', html = TRUE)
-        
     }
     return(valid_inputs)
 }
