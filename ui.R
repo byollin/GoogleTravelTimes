@@ -178,9 +178,17 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
             # 
             # br(),
             
+            textInput('email', label = 'Email:', placeholder = 'First.Last@wsp.com', width = '100%'),
+            column(12,div(id = 'email_message', style = 'margin-top: -12px;', p('Results are NOT sent to your email address.')) %>% hidden()),
+            
+            textInput('project', label = 'Project number:', width = '100%', placeholder = 'TK421T9-A'),
+            
+            textAreaInput('desc', label = 'Request description:', width = '100%', resize = 'none', 
+                          placeholder = "e.g., Travel times from Lynnwood Transit Center to Totem Lake."),
+            
             div(passwordInput('api_key', label = 'API key: ', width = '100%'), style = 'margin-top:8px;'),
             
-            column(12,div(id = 'api_message', style = 'margin-top: -12px;', p('Note: your requests are made securely over HTTPS.')) %>% hidden()),
+            column(12,div(id = 'api_message', style = 'margin-top: -12px;', p('Your requests are made securely over HTTPS.')) %>% hidden()),
             
             column(12,
             actionBttn('submit', 'Submit Requests', style = 'simple', color = 'danger', block = TRUE),
@@ -198,6 +206,8 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
     dashboardBody(
         
         useShinyjs(),
+        
+        extendShinyjs(text = detect_ip, functions = "getIP"),
         
         # add scroll to sidebar on overflow
         tags$head(tags$script(type = 'text/javascript',

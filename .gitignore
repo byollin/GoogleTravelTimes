@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 _conf/api_key.txt
+_conf/db_password.txt
 *.tar.gz

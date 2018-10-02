@@ -110,6 +110,10 @@ div.outer {
     font-size: 8pt;
 }
 
+#email_message {
+    margin-left: 0;
+    font-size: 8pt;
+}
 .skin-red .sidebar-menu>li>.treeview-menu {
     overflow: hidden;
 }

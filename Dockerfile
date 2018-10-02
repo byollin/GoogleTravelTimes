@@ -7,10 +7,13 @@ RUN apt-get update \
     libgdal-dev \
 	libproj-dev \
 	libjq-dev \
+	libpq-dev \
+	postgresql \
 	nginx
 
 # install stable packages from CRAN
 RUN R -e "install.packages('devtools')" && \
+	R -e "install.packages('RPostgreSQL')" && \
 	R -e "install.packages('dplyr')" && \
 	R -e "install.packages('tidyr')" && \
 	R -e "install.packages('stringr')" && \
