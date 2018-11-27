@@ -3,10 +3,9 @@ suppressWarnings(suppressMessages({
     library(RCurl)
 }))
 
-gmapsroute = function(origin, destination, waypoints = '', mode = 'driving', key = '',
-                      alternatives = FALSE, avoid = '', departure = 'now', dep_date = '',
-                      dep_time = '', traffic_model = 'best_guess', arrival = '', arr_date = '',
-                      arr_time = '', transit_mode = '', transit_routing_preference = '') {
+gmapsroute = function(origin, destination, waypoints = '', mode = 'driving', key = '', alternatives = FALSE, avoid = '',
+                      departure = 'now', dep_date = '', dep_time = '', traffic_model = 'best_guess', arrival = '',
+                      arr_date = '', arr_time = '', transit_mode = '', transit_routing_preference = '') {
     
     # VALIDATE INPUT PARAMETERS ########################################################################################
     
@@ -139,7 +138,7 @@ gmapsroute = function(origin, destination, waypoints = '', mode = 'driving', key
     
     # PARSE RESPONSE ###############################################################################################
     
-    # call web service and store XML
+    # call web service
     webpageXML   = read_xml(getURL(url, .mapUnicode = F))
     error_nodes  = webpageXML %>% xml_find_all("//error_message") %>% xml_text()
     status_nodes = webpageXML %>% xml_find_all("//status") %>% xml_text()
@@ -161,7 +160,6 @@ gmapsroute = function(origin, destination, waypoints = '', mode = 'driving', key
         data$Status = 'PLACE_NOT_FOUND'
     }
     
-    # check quota
     if (status_nodes == 'OVER_QUERY_LIMIT') {
         data$Status = 'OVER_QUERY_LIMIT'
     }

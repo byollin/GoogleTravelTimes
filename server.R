@@ -1,7 +1,3 @@
-origin_icon      = makeAwesomeIcon(icon = 'circle', markerColor = 'green', library = 'fa', iconColor = '#ffffff')
-destination_icon = makeAwesomeIcon(icon = 'circle', markerColor = 'red', library = 'fa', iconColor = '#ffffff')
-waypoint_icon    = makeAwesomeIcon(icon = 'circle', markerColor = 'blue', library = 'fa', iconColor = '#ffffff')
-
 shinyServer(function(input, output, session) {
     
     js$getIP()
@@ -21,7 +17,7 @@ shinyServer(function(input, output, session) {
     # display lat/lng on map load
     js_code = 'function(el, x) {
                     this.addEventListener("mousemove", function(e) {
-                        document.getElementById("info").innerHTML = e.latlng.lat.toFixed(6) + ", " + e.latlng.lng.toFixed(6);
+                        document.getElementById("coords").innerHTML = e.latlng.lat.toFixed(6) + ", " + e.latlng.lng.toFixed(6);
                     })
                 }'
     
@@ -30,17 +26,11 @@ shinyServer(function(input, output, session) {
     })
     
     output$map = renderLeaflet({
-        
         leaflet::leaflet(options = leafletOptions(minZoom = 4, maxZoom = 18,
                                                   zoomControl = FALSE)) %>%
             addTiles(urlTemplate = 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
                      attribution = '<a href="https://maps.wikimedia.org/" title="Wikimedia Maps Beta">Wikimedia Maps</a> | Map data provided by <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap Contributors">OpenStreetMap © Contributors</a>') %>%
-            setView(lng = -122.239144, lat = 47.57552, zoom = 12) %>%
-            addMiniMap(position = 'bottomleft',
-                       tiles = 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-                       toggleDisplay = TRUE) %>% onRender(js_code)
-            
-        
+            setView(lng = -122.239144, lat = 47.57552, zoom = 12) %>% onRender(js_code)
     })
     
     observeEvent(input$add_range, {
@@ -66,44 +56,34 @@ shinyServer(function(input, output, session) {
         marker_status[[waypoint_marker]] = TRUE
         
         observeEvent(input[[remove_button]], ignoreInit = TRUE, once = TRUE, {
-            
             removeUI(selector = paste0('#', waypoint_div))
             waypoint_values[[waypoint_div]]  = NULL
             marker_status[[waypoint_marker]] = NULL
             leafletProxy('map') %>% removeMarker(waypoint_layer_id)
             leafletProxy('map') %>% removeShape('route')
-            
         })
         
         observeEvent(input[[waypoint_marker]], ignoreInit = TRUE, {
-            
             if(input[[waypoint_marker]] == TRUE) {
                 toggle_markers(session, waypoint_marker, names(marker_status))
                 marker_status[[waypoint_marker]] = TRUE
             } else {
                 marker_status[[waypoint_marker]] = FALSE
             }
-            
         })
         
         observeEvent(input[[waypoint_layer_id]], ignoreInit = TRUE, {
-            
             if(validate_coords(input[[waypoint_layer_id]])) {
-                
                 lat = str_replace(input[[waypoint_layer_id]], ' ', '') %>% str_split(',')
                 lat = lat[[1]][1] %>% as.numeric()
                 lng = str_replace(input[[waypoint_layer_id]], ' ', '') %>% str_split(',')
                 lng = lng[[1]][2] %>% as.numeric()
-                
                 leafletProxy('map') %>% addAwesomeMarkers(lng = lng, lat = lat, layerId = waypoint_layer_id,
                                                           icon = waypoint_icon, popup = paste0(lat,', ', lng))
                 leafletProxy('map') %>% removeShape('route')
-                
             } else {
-                
-                leafletProxy('map') %>% removeMarker(waypoint_layer_id)
+                leafletProxy('map') %>% removeMarker(waypoint_layer_id) 
                 leafletProxy('map') %>% removeShape('route')
-                
             }
             
         })
@@ -136,34 +116,22 @@ shinyServer(function(input, output, session) {
         
         marker_status_list = reactiveValuesToList(marker_status)
         selected_marker    = marker_status_list[sapply(marker_status_list, isTRUE, simplify = T)] %>% names()
-
         if(length(selected_marker) > 0) {
-
             if(selected_marker == 'add_origin') {
-                
                 lat = round(input$map_click$lat, 6)
                 lng = round(input$map_click$lng, 6)
-                
                 updateTextInput(session, 'origin', value = paste0(lat, ', ', lng))
-
             } else if(selected_marker == 'add_destination') {
-                
                 lat = round(input$map_click$lat, 6)
                 lng = round(input$map_click$lng, 6)
-                
                 updateTextInput(session, 'destination', value = paste0(lat, ', ', lng))
-
             } else {
-                
                 lat = round(input$map_click$lat, 6)
                 lng = round(input$map_click$lng, 6)
-                
                 updateTextInput(session, paste0('waypoint_',
                                                 str_extract(selected_marker, '\\d{1,}')),
                                 value = paste0(lat, ', ', lng))
-
             }
-
         }
         
     })
@@ -196,47 +164,33 @@ shinyServer(function(input, output, session) {
     })
     
     observeEvent(input$origin, ignoreInit = TRUE, {
-        
         if(validate_coords(input$origin)) {
-            
             lat = str_replace(input$origin, ' ', '') %>% str_split(',')
             lat = lat[[1]][1] %>% as.numeric()
             lng = str_replace(input$origin, ' ', '') %>% str_split(',')
             lng = lng[[1]][2] %>% as.numeric()
-            
             leafletProxy('map') %>% addAwesomeMarkers(lng = lng, lat = lat, layerId = 'origin',
                                                       icon = origin_icon, popup = paste0(lat,', ', lng))
             leafletProxy('map') %>% removeShape('route')
-            
         } else {
-            
             leafletProxy('map') %>% removeMarker('origin')
             leafletProxy('map') %>% removeShape('route')
-            
         }
-        
     })
     
     observeEvent(input$destination, ignoreInit = TRUE, {
-        
         if(validate_coords(input$destination)) {
-            
             lat = str_replace(input$destination, ' ', '') %>% str_split(',')
             lat = lat[[1]][1] %>% as.numeric()
             lng = str_replace(input$destination, ' ', '') %>% str_split(',')
             lng = lng[[1]][2] %>% as.numeric()
-            
             leafletProxy('map') %>% addAwesomeMarkers(lng = lng, lat = lat, layerId = 'destination',
                                                       icon = destination_icon, popup = paste0(lat,', ', lng))
             leafletProxy('map') %>% removeShape('route')
-            
         } else {
-            
             leafletProxy('map') %>% removeMarker('destination')
             leafletProxy('map') %>% removeShape('route')
-            
         }
-        
     })
     
     observeEvent(input$api_key, ignoreInit = FALSE, {
@@ -362,6 +316,7 @@ shinyServer(function(input, output, session) {
         
         if(input$confirm == TRUE) {
             
+            # log submitted job
             try(silent = TRUE, {
                 db_conn = dbConnect(dbDriver('PostgreSQL'), host = '10.68.193.183', user = 'dig',
                                     password = db_pw, dbname = 'api_data')
@@ -372,7 +327,7 @@ shinyServer(function(input, output, session) {
                                 description := '", input$desc, "',
                                 rec_count := ", client_info$count, ",
                                 status := '", 'SUBMITTED', "')")
-                dbExecute(db_conn, insert)
+                suppressWarnings(dbExecute(db_conn, insert))
                 dbDisconnect(db_conn)
             })
             
@@ -418,6 +373,7 @@ shinyServer(function(input, output, session) {
             }
             
             shinyjs::hide('download_div')
+            shinyjs::hide('view_results')
             
             progress$status$set(message = 'Requesting...')
             
@@ -427,10 +383,10 @@ shinyServer(function(input, output, session) {
             
             coords = c(origin, waypoints, destination)
             
-            # TODO: implement cancel task
-            tt = travel_times(start_date, end_date, time_period_1, time_period_2, freq,
-                              days_of_week, traffic_model, time_zone, coords,
-                              isolate(input$api_key), session)
+            # TODO: IMPLEMENT CANCEL TASK
+            tt = travel_times(start_date, end_date, time_period_1, time_period_2, freq, days_of_week, traffic_model,
+                              time_zone, coords, isolate(input$api_key), session)
+            # log completed job
             try(silent = TRUE, {
                 db_conn = dbConnect(dbDriver('PostgreSQL'), host = '10.68.193.183', user = 'dig',
                                     password = db_pw, dbname = 'api_data')
@@ -441,14 +397,21 @@ shinyServer(function(input, output, session) {
                                 description := '", input$desc, "',
                                 rec_count := ", client_info$count, ",
                                 status := '", 'COMPLETED', "')")
-                print(insert)
-                dbExecute(db_conn, insert)
+                suppressWarnings(dbExecute(db_conn, insert))
                 dbDisconnect(db_conn)
             })
+            
             results$data = tt
-            shinyjs::show('download_div')
-            output$download = downloadHandler(filename = paste0('results', Sys.time() %>% as.numeric(), '.csv'),
-                                               content = function(file) { write.csv(results$data, file, row.names = FALSE) })
+            output$results = renderDataTable({
+                DT::datatable(results$data, class = 'compact', rownames = F, width = '100%', style = 'bootstrap',
+                              extensions = 'Buttons',
+                              options = list(dom = 'Bfrtip', pageLength = 20, scrollX = T, ordering = T, scrollY = 450,
+                                             fixedHeader = T, deferRender = T,
+                                             selection = list(mode = 'single', target = 'row'),
+                                             buttons = list(list(extend = 'collection', buttons = c('csv', 'excel'),
+                                                       text = 'Download'))))
+            })
+            shinyjs::show('view_results')
             progress$status$set(message = 'Complete!')
             Sys.sleep(2)
         } else {
@@ -458,26 +421,30 @@ shinyServer(function(input, output, session) {
         progress$status$close()
         
         # hide spinner
-        delay(ms = 50, {
-            
-            shinyjs::hide('spinner')
-            
-        })
+        delay(ms = 50, { shinyjs::hide('spinner') })
         
     })
     
     observeEvent(input$contact, {
-        
-        sendSweetAlert(session = session, title = NULL,
-            text = tags$span(style = 'text-align: left;',
-                             tags$h3("Contact Us", style = "color: #d73926;"),
-                             tags$div(renderDataTable(contact, escape = F,
-                                                      options = list(paging = FALSE,
-                                                                     searching = FALSE,
-                                                                     dom = 't')))),
-            html = T, btn_labels = c('Close')
+        sendSweetAlert(session = session, title = NULL, text = tags$span(style = 'text-align: left;',
+                       tags$h3('Contact Us', style = 'color: #d73926;'),
+                       tags$div(id = 'contact_table',
+                           renderDataTable(contact, escape = F, rownames = FALSE, selection = 'none',
+                                           options = list(paging = FALSE, searching = FALSE, dom = 't',
+                                                          # remove table header
+                                                          initComplete = JS('function(settings, json) {',
+                                                                                '$(this.api().table().header()).css({"display": "none"});',
+                                                                            '}')))
+                        )), html = TRUE, btn_labels = c('Close')
         )
-        
+    })
+    
+    observeEvent(input$view_results, {
+        shinyjs::show('results_panel', anim = TRUE, animType = 'slide')
+    })
+    
+    observeEvent(input$close_results, {
+        shinyjs::hide('results_panel', anim = TRUE, animType = 'slide')
     })
     
     # add crosshair cursor to map

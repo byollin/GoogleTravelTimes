@@ -32,7 +32,8 @@ RUN R -e "install.packages('devtools')" && \
 # install development versions from GitHub
 RUN R -e "devtools::install_github('daattali/shinyjs')" && \
 	R -e "devtools::install_github('dreamRs/shinyWidgets')"  && \
-	R -e "devtools::install_github('rstudio/leaflet')"
+	R -e "devtools::install_github('rstudio/leaflet')" && \
+	R -e "devtools::install_github('rstudio/DT')"
 
 # remove default app
 RUN rm -rf /srv/shiny-server/*
