@@ -401,7 +401,7 @@ shinyServer(function(input, output, session) {
             })
             
             results$data = tt
-            output$results = renderDataTable({
+            output$results = renderDataTable(server = FALSE, {
                 DT::datatable(results$data, class = 'compact', rownames = F, width = '100%', style = 'bootstrap',
                               extensions = 'Buttons',
                               options = list(dom = 'Bfrtip', pageLength = 20, scrollX = T, ordering = T, scrollY = 450,
