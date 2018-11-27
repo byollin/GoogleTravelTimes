@@ -13,10 +13,8 @@
   background-color: #ffffff;
 }
 
-.fa-lg {
-    font-size: 1.5em;
-    line-height: .75em;
-    color: white;
+.glyphicon {
+  color: #ffffff;
 }
 
 #div.contact_table > thead {

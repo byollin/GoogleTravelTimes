@@ -5,7 +5,7 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
     dashboardHeader(title = span(tagList(icon('google', class = 'fa-lg alignright'), 'oogle Travel Times')),
                     titleWidth = 350,
                     tags$li(class = "dropdown", actionLink('contact', label = '',
-                                                           icon = icon('envelope-o', class = 'fa-lg alignleft'))),
+                                                           icon = icon('envelope-o', class = 'fa-lg'))),
                     tags$li(class = "dropdown", tags$a(href="https://www.wsp.com/en-GL", target="_blank",
                                                        tags$img(height = "20px", alt="WSP USA ©", src="wsp_logo.png")))
     ),
@@ -22,9 +22,9 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
                     sliderInput('time_range_1', 'Time range: ', min = 0, max = 24, post = ':00', step = 1,
                                 value = c(6, 18))
                 ),
-                column(1, style = 'padding-left: 0; margin-top: 36px; margin-left: -12px;',
+                column(1, style = 'padding-left: 0; margin-top: 38px; margin-left: -13px;',
                     br(),
-                    actionLink('add_range', label = '', icon = icon('plus-circle', class = 'fa-lg alignleft'))
+                    actionLink('add_range', label = '', icon = icon('plus-sign', lib = 'glyphicon'))
                 )
             ),
             br(),
@@ -34,9 +34,9 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
                     sliderInput('time_range_2', label = NULL, min = 0, max = 24, post = ':00', step = 1,
                                 value = c(6, 18))
                 ),
-                column(1, style = 'padding-left: 0; margin-top: 12px; margin-left: -12px;',
+                column(1, style = 'padding-left: 0; margin-top: 13px; margin-left: -13px;',
                     br(),
-                    actionLink('remove_range', label = '', icon = icon('minus-circle',  class = 'fa-lg alignleft'))
+                    actionLink('remove_range', label = '', icon = icon('minus-sign', lib = 'glyphicon'))
                 )
             ) %>% hidden(),
             # time zone selection
@@ -74,12 +74,13 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
                  column(1, style = 'margin-top: 2px; margin-left: -40px',
                     br(),
                     prettyToggle(inputId = 'add_origin', label_on = NULL, label_off = NULL, outline = TRUE,
-                                 plain = TRUE, icon_on = icon('map-marker'), icon_off = icon('map-marker'),
-                                 status_on = 'danger', status_off = 'info', bigger = TRUE)
+                                 plain = TRUE, icon_on = icon('map-marker', lib = 'glyphicon'),
+                                 icon_off = icon('map-marker', lib = 'glyphicon'), status_on = 'danger',
+                                 status_off = 'info', bigger = TRUE)
             )),
             br(),
             # add waypoint
-            actionLink('add_waypoint', label = 'Add waypoint', icon = icon('plus-circle', class = 'alignleft'),
+            actionLink('add_waypoint', label = 'Add waypoint', icon = icon('plus-sign', lib = 'glyphicon'),
                        style = 'margin-left: 15px'),
             # destination
             div(style = inline_block_css,
@@ -90,8 +91,9 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
                 column(1, style = 'margin-top: 2px; margin-left: -40px',
                     br(),
                     prettyToggle(inputId = 'add_destination', label_on = NULL, label_off = NULL, outline = TRUE,
-                                 plain = TRUE, icon_on = icon('map-marker'), icon_off = icon('map-marker'),
-                                 status_on = 'danger', status_off = 'info', bigger = TRUE)
+                                 plain = TRUE, icon_on = icon('map-marker', lib = 'glyphicon'),
+                                 icon_off = icon('map-marker', lib = 'glyphicon'), status_on = 'danger',
+                                 status_off = 'info', bigger = TRUE)
                 )
             ),
             br(),

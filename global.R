@@ -63,13 +63,14 @@ add_waypoint_div = function(id) {
             column(1, style = 'padding-left: 0; z-index: 300;  margin-left: -18px;',
                 br(),
                 actionLink(paste0('remove_waypoint_', id), label = '',
-                           icon = icon('minus-circle', class = 'fa-lg alignleft'))
+                           icon = icon('minus-sign', lib = 'glyphicon'))
             ),
             column(1, style = 'margin-top: -22px; margin-left: -20px',
                 br(),
                 prettyToggle(paste0('add_waypoint_marker_', id), label_on = NULL, label_off = NULL, outline = TRUE,
-                             plain = TRUE, icon_on = icon('map-marker'), icon_off = icon('map-marker'),
-                             status_on = 'danger', status_off = 'info', bigger = TRUE, inline = TRUE, value = TRUE)
+                             plain = TRUE, icon_on = icon('map-marker', lib = 'glyphicon'),
+                             icon_off = icon('map-marker', lib = 'glyphicon'), status_on = 'danger',
+                             status_off = 'info', bigger = TRUE, inline = TRUE, value = TRUE)
             )),
         br())
     })

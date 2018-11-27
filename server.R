@@ -128,8 +128,7 @@ shinyServer(function(input, output, session) {
             } else {
                 lat = round(input$map_click$lat, 6)
                 lng = round(input$map_click$lng, 6)
-                updateTextInput(session, paste0('waypoint_',
-                                                str_extract(selected_marker, '\\d{1,}')),
+                updateTextInput(session, paste0('waypoint_', str_extract(selected_marker, '\\d{1,}')),
                                 value = paste0(lat, ', ', lng))
             }
         }
@@ -430,6 +429,7 @@ shinyServer(function(input, output, session) {
                        tags$h3('Contact Us', style = 'color: #d73926;'),
                        tags$div(id = 'contact_table',
                            renderDataTable(contact, escape = F, rownames = FALSE, selection = 'none',
+                                           style = 'bootstrap',
                                            options = list(paging = FALSE, searching = FALSE, dom = 't',
                                                           # remove table header
                                                           initComplete = JS('function(settings, json) {',
