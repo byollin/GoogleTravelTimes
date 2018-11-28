@@ -125,6 +125,11 @@ div.outer {
     margin-left: 0;
     font-size: 8pt;
 }
+
+.skin-red .main-header .navbar .sidebar-toggle {
+  display: none;
+}
+
 .skin-red .sidebar-menu>li>.treeview-menu {
     overflow: hidden;
 }
