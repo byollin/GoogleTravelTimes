@@ -399,8 +399,9 @@ shinyServer(function(input, output, session) {
                 suppressWarnings(dbExecute(db_conn, insert))
                 dbDisconnect(db_conn)
             })
-            
-            results$data = tt
+
+            results$data = tt %>% mutate(departure_time = as.character(departure_time),
+                                         computed_departure = as.character(computed_departure))
             output$results = renderDataTable(server = FALSE, {
                 DT::datatable(results$data, class = 'compact', rownames = F, width = '100%', style = 'bootstrap',
                               extensions = 'Buttons',

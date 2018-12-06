@@ -55,6 +55,7 @@ body, label, input, button, select, td, th, tr, strong {
     font-family: 'Heebo', sans-serif;
     font-weight: 600;
     font-size: 16pt;
+    background-color: #c74333;
 }
 
 
@@ -108,7 +109,7 @@ div.outer {
     border: none;
     border-radius: 0;
     padding: 4px;
-    background-color: #f5f5f5eb;
+    background-color: #f5f5f5;
 }
 
 #test_message {
