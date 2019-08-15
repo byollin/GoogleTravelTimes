@@ -4,10 +4,11 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
     # DASHBOARD HEADER #################################################################################################
     dashboardHeader(title = span(tagList(icon('google', class = 'fa-lg alignright'), 'oogle Travel Times')),
                     titleWidth = 350,
-                    tags$li(class = "dropdown", actionLink('contact', label = '',
-                                                           icon = icon('envelope-o', class = 'fa-lg'))),
-                    tags$li(class = "dropdown", tags$a(href="https://www.wsp.com/en-GL", target="_blank",
-                                                       tags$img(height = "20px", alt="WSP USA ©", src="wsp_logo.png")))
+                    tags$li(class = 'dropdown',
+                            actionLink('contact', label = '', icon = icon('envelope-o', class = 'fa-lg'))),
+                    tags$li(class = 'dropdown',
+                            tags$a(href = "https://www.wsp.com/en-GL", target = "_blank",
+                                   tags$img(height = "20px", alt = "WSP USA ©", src = "wsp_logo.png")))
     ),
     # DASHBOARD SIDEBAR ################################################################################################                
     dashboardSidebar(width = 350,
@@ -42,8 +43,8 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
             # time zone selection
             # TODO: SIMPLIFY LIST OF TIME ZONES
             selectizeInput('time_zone', label = 'Time zone: ', choices = tzs, selected = 'America/Los Angeles',
-                           width = '100%', multiple = TRUE, options = list(maxItems = 1,
-                                                                           placeholder = 'Choose a time zone')),
+                           width = '100%', multiple = TRUE,
+                           options = list(maxItems = 1, placeholder = 'Choose a time zone')),
             # time frequency selection
             selectInput('frequency', label = 'Frequency: ', choices = c('5 minutes', '10 minutes', '15 minutes',
                                                                         '30 minutes', '45 minutes', '1 hour'),
@@ -99,24 +100,22 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
             br(),
             column(12,
                 actionBttn('test', 'Test Route', style = 'simple', color = 'danger', block = TRUE),
-                div(id = 'test_message', style = 'margin-top: 2px;',
-                    p('Note: you will not be billed for this operation.'))),
+                p('-', style = 'font-size: smaller; color: #2b3b41;')
+            ),
             br()
         ))),
         # >> STEP 3 ####################################################################################################
         menuItem(text = 'Step 3: Verify and Submit Request', icon = icon('check'),
-            textInput('email', label = 'Email:', placeholder = 'First.Last@wsp.com', width = '100%'),
+            textInput('email', label = 'Email:', placeholder = 'first.last@wsp.com', width = '100%'),
             column(12,
-                div(id = 'email_message', style = 'margin-top: -12px;',
-                    p('Results are NOT sent to your email address.')) %>% hidden()
+                p('Results are NOT sent to your email address.', style = 'margin-top: -12px; font-size: smaller;')
             ),
-            textInput('project', label = 'Project number:', width = '100%', placeholder = 'TK421T9-A'),
+            textInput('project', label = 'Project number:', width = '100%', placeholder = '160363P'),
             textAreaInput('desc', label = 'Request description:', width = '100%', resize = 'none', 
                           placeholder = "e.g., Travel times from Lynnwood Transit Center to Totem Lake."),
             div(passwordInput('api_key', label = 'API key: ', width = '100%'), style = 'margin-top:8px;'),
-            column(12,
-                div(id = 'api_message', style = 'margin-top: -12px;',
-                    p('Your requests are made securely over HTTPS.')) %>% hidden()
+            column(12, style = 'margin-top: -12px; font-size: smaller; padding-bottom: 14px;',
+                tags$a(href = 'google_api.html', target = '_blank', "Don't have an API key? See how to create one.")
             ),
             column(12,
                 actionBttn('submit', 'Submit Requests', style = 'simple', color = 'danger', block = TRUE),
@@ -127,7 +126,7 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
             )
         ),
         div(id = 'release',
-            p('WSP USA Ⓒ 2018')
+            p('WSP USA Ⓒ 2019')
         ))
     ),
     # DASHBOARD BODY ###################################################################################################
@@ -143,7 +142,7 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
         tags$head(tags$link(rel = 'stylesheet', type = 'text/css', href = 'custom.css')),
         div(class = 'outer',
             absolutePanel(id = 'coord_panel', top = 18, right = 8, width = 'auto', pre(id = 'coords')),
-            leafletOutput('map', width='100%', height='100%'),
+            leafletOutput('map', width = '100%', height = '100%'),
             hidden(div(id = 'spinner',
                 div() %>% withSpinner(type = 8, proxy.height = '400px', color = '#d73926')
             ))
@@ -161,7 +160,7 @@ dashboardPage(skin = 'red', title = 'Google Travel Times',
                 p('-', style = 'font-size: smaller; color: white;')
             )
         ) %>% hidden(),
-        tags$img(height = "10px", alt="Google ©", src="powered_by_google_on_white.png",
+        tags$img(height = '10px', alt = 'Google ©', src = 'powered_by_google_on_white.png',
                  style = 'position: absolute; right: 8px; bottom: 20px')
     )
 )

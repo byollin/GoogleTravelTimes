@@ -5,9 +5,8 @@ suppressWarnings(suppressMessages({
 
 source('R/gmapdirections.R')
 
-# TODO: add parameter to handle non-segmented requests
-travel_times = function(start_date, end_date, time_period_1, time_period_2, interval, days_of_week,
-                        traffic_model, tz, coords, key, session) {
+travel_times = function(start_date, end_date, time_period_1, time_period_2, interval, days_of_week, traffic_model, tz,
+                        coords, key) {
     
     get_departure_offset = function(i, cum_tt, res) {
         if (i == 1) {
@@ -28,16 +27,16 @@ travel_times = function(start_date, end_date, time_period_1, time_period_2, inte
                                                   ymd_hms(paste0(x, ' ', time_period_1[2], ':00:00'), tz = tz),
                                                   by = interval) })
     time_seq = do.call('c', time_seq)
-    if(time_period_2 != '') {
+    if(length(time_period_2) > 1) {
         time_seq_2 = lapply(date_seq, function(x) { seq(ymd_hms(paste0(x, ' ', time_period_2[1], ':00:00'), tz = tz),
-                                                         ymd_hms(paste0(x, ' ', time_period_2[2], ':00:00'), tz = tz),
-                                                         by = interval) })
+                                                        ymd_hms(paste0(x, ' ', time_period_2[2], ':00:00'), tz = tz),
+                                                        by = interval) })
         time_seq_2 = do.call('c', time_seq_2)
         time_seq   = c(time_seq, time_seq_2) %>% sort()
     }
     coords          = str_replace_all(coords, ' ', '')
     od_pairs        = data.frame('o' = coords[1:(length(coords) - 1)], 'd' = coords[2:length(coords)],
-                                  segment = seq(1:(length(coords) - 1)), stringsAsFactors = FALSE)
+                                 segment = seq(1:(length(coords) - 1)), stringsAsFactors = FALSE)
     cross_df        = crossing(od_pairs, time_seq, traffic_model)
     names(cross_df) = c('o', 'd', 'segment', 'departure_time', 'traffic_model')
 
@@ -78,7 +77,6 @@ travel_times = function(start_date, end_date, time_period_1, time_period_2, inte
             res           = try(gmapsdirection(o, d, departure = departure, key = key, traffic_model = traffic_model),
                                 silent = T)
             if('try-error' %in% class(res)) {
-                stop(res)
                 status    = 'R_ERROR'
                 tt        = -9999
                 distance  = -9999
@@ -97,10 +95,11 @@ travel_times = function(start_date, end_date, time_period_1, time_period_2, inte
         }
     }
     
-    tt = as.data.frame(par_results) %>% apply(2, unlist, use.names = FALSE) %>% 
-            as.data.frame(row.names = FALSE, stringsAsFactors = FALSE) %>% as_tibble()
+    tt = as.data.frame(par_results) %>% apply(2, unlist, use.names = FALSE) %>%
+         as.data.frame(row.names = FALSE, stringsAsFactors = FALSE) %>% as_tibble()
     tt = mutate(tt, departure_time = as.numeric(departure_time) %>% as.POSIXct(origin = '1970-01-01', tz = tz),
                 computed_departure = as.numeric(computed_departure) %>% as.POSIXct(origin = '1970-01-01', tz = tz))
     
     return(tt)
+    
 }

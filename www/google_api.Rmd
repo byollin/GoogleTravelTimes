@@ -1,0 +1,89 @@
+---
+title: "Acquiring a Google Directions API Key"
+date: "Updated: May 9, 2019"
+output:
+  html_document:
+    css: styles.css
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Step 0: Set up a Google Account
+
+You will need a Google Account to acquire a Google Maps API key. If you do not have a Google account, create one [here](https://myaccount.google.com/intro?hl=en-US).
+
+## Step 1: Create a project in the Google Cloud Platform
+
+Sign into your Google Account and go to the Google Cloud Platform Console: https://console.cloud.google.com/. If you have not activated this feature, agree to the Terms of Service and continue.
+
+Click the "Select a project" dropdown menu on the upper left of the navigation bar.
+
+![](new_project1.png){width=800px}
+
+In the popup, click "New project".
+
+![](new_project2.png){width=800px}
+
+Give your project a name and click "Create".
+
+![](new_project3.png){width=800px}
+
+## Step 2: Enable the Google Directions API for your Google project
+
+Once your project is created, switch to the project from the "Select a project" dropdown menu on the upper left of the navigation bar.
+
+In the popup, click on the project you created.
+
+![](enable1.png){width=800px}
+
+In the hamburger menu, navigate to the APIs & Services Dashboard.
+
+![](enable2.png){width=800px}
+
+On the APIs & Services Dashboard, click "Enable APIs and Services".
+
+![](enable3.png){width=800px}
+
+Enabling APIs and Services will bring up the API Library. Search for "directions" and click on the "Directions API".
+
+![](enable4.png){width=800px}
+
+Enable the Directions API.
+
+![](enable5.png){width=800px}
+
+## Step 3: Create an API key for the Google Directions API
+
+Enabling the Directions API will automatically take you to the Directions API dashboard. The dashboard allows you to monitor the API's usage, manage quotas and create API keys.
+
+Navigate to the Credentials tab and click "Create credentials".
+
+![](api1.png){width=800px}
+
+In the dropdown menu, select "API key".
+
+![](api2.png){width=800px}
+
+The API key is now created. You can copy and paste it in a safe location on your local desktop or access it from the Google Cloud Platform console at any time.
+
+![](api3.png){width=800px}
+
+## Step 4: Enable billing for your Google project
+
+The API key cannot be used until you enable billing for the Google project. API users are granted \$200 in free usage each month (approximately 40,000 requests). Beyond \$200, the requests to the Directions API are billed at $5.00 per additional 1,000 requests. See more pricing details [here](https://cloud.google.com/maps-platform/pricing/).
+
+In the hamburger menu, click on "Billing".
+
+![](billing1.png){width=800px}
+
+On the next page, click "Link a billing account" and then "Create a billing account". You will need a credit card to complete this step. You will not be billed unless your API keys is used to make more than 40,000 requests in a single month. You can track the API's usage on the Directions API dashboard.
+
+![](billing2.png){width=800px}
+
+If you have any questions contact Bethany Yollin (bethany.yollin@wsp.com).

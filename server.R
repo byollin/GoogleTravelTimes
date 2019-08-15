@@ -26,10 +26,12 @@ shinyServer(function(input, output, session) {
     })
     
     output$map = renderLeaflet({
-        leaflet::leaflet(options = leafletOptions(minZoom = 4, maxZoom = 18,
-                                                  zoomControl = FALSE)) %>%
+        leaflet::leaflet(options = leafletOptions(minZoom = 4, maxZoom = 18, zoomControl = FALSE)) %>%
             addTiles(urlTemplate = 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-                     attribution = '<a href="https://maps.wikimedia.org/" title="Wikimedia Maps Beta">Wikimedia Maps</a> | Map data provided by <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap Contributors">OpenStreetMap © Contributors</a>') %>%
+                     attribution = paste0('<a href="https://maps.wikimedia.org/" title="Wikimedia Maps Beta">',
+                                          'Wikimedia Maps</a> | Map data provided by <a href=',
+                                          '"https://www.openstreetmap.org/copyright" title="OpenStreetMap ',
+                                          'Contributors">OpenStreetMap © Contributors</a>')) %>%
             setView(lng = -122.239144, lat = 47.57552, zoom = 12) %>% onRender(js_code)
     })
     
@@ -189,22 +191,6 @@ shinyServer(function(input, output, session) {
         } else {
             leafletProxy('map') %>% removeMarker('destination')
             leafletProxy('map') %>% removeShape('route')
-        }
-    })
-    
-    observeEvent(input$api_key, ignoreInit = FALSE, {
-        if(nchar(input$api_key) > 0) {
-            shinyjs::show('api_message')
-        } else {
-            shinyjs::hide('api_message')
-        }
-    })
-    
-    observeEvent(input$email, ignoreInit = FALSE, {
-        if(nchar(input$email) > 0) {
-            shinyjs::show('email_message')
-        } else {
-            shinyjs::hide('email_message')
         }
     })
     
@@ -383,37 +369,48 @@ shinyServer(function(input, output, session) {
             coords = c(origin, waypoints, destination)
             
             # TODO: IMPLEMENT CANCEL TASK
-            tt = travel_times(start_date, end_date, time_period_1, time_period_2, freq, days_of_week, traffic_model,
-                              time_zone, coords, isolate(input$api_key), session)
-            # log completed job
-            try(silent = TRUE, {
-                db_conn = dbConnect(dbDriver('PostgreSQL'), host = '10.68.193.183', user = 'dig',
-                                    password = db_pw, dbname = 'api_data')
-                insert = paste0("SELECT log_google_distance(apikey := '", input$api_key, "',
+            tt = try(silent = TRUE, {
+                travel_times(start_date, end_date, time_period_1, time_period_2, freq, days_of_week, traffic_model,
+                             time_zone, coords, isolate(input$api_key))  
+            })
+            
+            if('try-error' %in% class(tt)) {
+                print(tt)
+                sendSweetAlert(session, title = '', text = tags$span(tags$span('An error occured while processing your request.')),
+                               type = 'error', btn_labels = 'OK', html = TRUE)
+                progress$status$set(message = 'Canceling...')
+                Sys.sleep(2)
+            } else {
+                # log completed job
+                try(silent = TRUE, {
+                    db_conn = dbConnect(dbDriver('PostgreSQL'), host = '10.68.193.183', user = 'dig',
+                                        password = db_pw, dbname = 'api_data')
+                    insert = paste0("SELECT log_google_distance(apikey := '", input$api_key, "',
                                 ip_address := '", client_info$local_ip, "',
                                 email := '", input$email, "',
                                 project_no := '", input$project, "',
                                 description := '", input$desc, "',
                                 rec_count := ", client_info$count, ",
                                 status := '", 'COMPLETED', "')")
-                suppressWarnings(dbExecute(db_conn, insert))
-                dbDisconnect(db_conn)
-            })
-
-            results$data = tt %>% mutate(departure_time = as.character(departure_time),
-                                         computed_departure = as.character(computed_departure))
-            output$results = renderDataTable(server = FALSE, {
-                DT::datatable(results$data, class = 'compact', rownames = F, width = '100%', style = 'bootstrap',
-                              extensions = 'Buttons',
-                              options = list(dom = 'Bfrtip', pageLength = 20, scrollX = T, ordering = T, scrollY = 450,
-                                             fixedHeader = T, deferRender = T,
-                                             selection = list(mode = 'single', target = 'row'),
-                                             buttons = list(list(extend = 'collection', buttons = c('csv', 'excel'),
-                                                       text = 'Download'))))
-            })
-            shinyjs::show('view_results')
-            progress$status$set(message = 'Complete!')
-            Sys.sleep(2)
+                    suppressWarnings(dbExecute(db_conn, insert))
+                    dbDisconnect(db_conn)
+                })
+                
+                results$data = tt %>% mutate(departure_time = as.character(departure_time),
+                                             computed_departure = as.character(computed_departure))
+                output$results = renderDataTable(server = FALSE, {
+                    DT::datatable(results$data, class = 'compact', rownames = F, width = '100%', style = 'bootstrap',
+                                  extensions = 'Buttons',
+                                  options = list(dom = 'Bfrtip', pageLength = 20, scrollX = T, ordering = T, scrollY = 450,
+                                                 fixedHeader = T, deferRender = T,
+                                                 selection = list(mode = 'single', target = 'row'),
+                                                 buttons = list(list(extend = 'collection', buttons = c('csv', 'excel'),
+                                                                     text = 'Download'))))
+                })
+                shinyjs::show('view_results')
+                progress$status$set(message = 'Complete!')
+                Sys.sleep(2)   
+            }
         } else {
             progress$status$set(message = 'Canceling...')
             Sys.sleep(2)
@@ -426,17 +423,14 @@ shinyServer(function(input, output, session) {
     })
     
     observeEvent(input$contact, {
-        sendSweetAlert(session = session, title = NULL, text = tags$span(style = 'text-align: left;',
+        sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                       tags$span(style = 'text-align: left;',
                        tags$h3('Contact Us', style = 'color: #d73926;'),
-                       tags$div(id = 'contact_table',
-                           renderDataTable(contact, escape = F, rownames = FALSE, selection = 'none',
-                                           style = 'bootstrap',
-                                           options = list(paging = FALSE, searching = FALSE, dom = 't',
-                                                          # remove table header
-                                                          initComplete = JS('function(settings, json) {',
-                                                                                '$(this.api().table().header()).css({"display": "none"});',
-                                                                            '}')))
-                        )), html = TRUE, btn_labels = c('Close')
+                       tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
+                       tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
+                              products that daylight powerful insights and enable our clients to harness the \
+                              full-potential of their data. Reach out to us!'),
+                       tags$div(id = 'contact_table', render_contact_table()))
         )
     })
     

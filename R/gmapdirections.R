@@ -16,114 +16,35 @@ suppressWarnings(suppressMessages({
     library(RCurl)
 }))
 
-gmapsdirection = function(origin, destination, waypoints = '', mode = 'driving', key = '', alternatives = FALSE,
-                          avoid = '', departure = 'now', dep_date = '', dep_time = '', traffic_model = 'best_guess',
-                          arrival = '', arr_date = '', arr_time = '', transit_mode = '',
-                          transit_routing_preference = '') {
+gmapsdirection = function(origin, destination, waypoints = '', mode = 'driving', key = '', departure = 'now',
+                          traffic_model = 'best_guess') {
     
     # VALIDATE INPUT PARAMETERS ########################################################################################
     
     if (!(mode %in% c('driving',  'walking',  'bicycling',  'transit'))) {
-        stop(
-            'Mode of transportation not recognized. Mode should be one of: ',
-            '\'bicycling\', \'transit\', \'driving\', \'walking\'.'
-        )
-    }
-    
-    if (!(avoid %in% c('', 'tolls',  'highways',  'ferries',  'indoor'))) {
-        stop(
-            'Avoid parameters not recognized. Avoid should be one of: ',
-            '\'tolls\', \'highways\', \'ferries\', \'indoor\'.'
-        )
+        stop('Mode of transportation not recognized. Mode should be one of: ',
+             '\'bicycling\', \'transit\', \'driving\', \'walking\'.')
     }
     
     if (!(traffic_model %in% c('best_guess',  'pessimistic', 'optimistic'))) {
-        stop(
-            'Traffic model not recognized. Traffic model should be one of: ',
-            '\'best_guess\', \'pessimistic\', \'optimistic\'.'
-        )
+        stop('Traffic model not recognized. Traffic model should be one of: ',
+             '\'best_guess\', \'pessimistic\', \'optimistic\'.')
     }
     
     ####################################################################################################################
     
     # VALIDATE DEPARTURE AND ARRIVAL TIMES #############################################################################
     
-    seconds         = 'now'
-    seconds_arrival = ''
-    
-    UTCtime  = strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%OS', tz = 'GMT')
-    min_secs = round(as.numeric(difftime(as.POSIXlt(Sys.time(), 'GMT'), UTCtime, units = 'secs')))
-    
-    # convert departure time to seconds after January 1, 1970, 00:00:00 UCT
-    if(dep_date != '' && dep_time != '') {
-        depart = strptime(paste(dep_date, dep_time), '%Y-%m-%d %H:%M:%OS', tz='GMT')
-        seconds = round(as.numeric(difftime(depart, UTCtime, units = 'secs')))
-    }
-    
-    if(departure != 'now') {
-        seconds = departure
-    }
+    utc_time = strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%OS', tz = 'GMT')
+    min_secs = round(as.numeric(difftime(as.POSIXlt(Sys.time(), 'GMT'), utc_time, units = 'secs')))
     
     if(departure != 'now' && departure < min_secs){
         stop('The departure time has to be some time in the future!')
     }
     
-    if(dep_date != '' && dep_time == '') {
-        stop('You should also specify a departure time in the format HH:MM:SS UTC')
-    }
-    
-    if(dep_date == '' && dep_time != '') {
-        stop('You should also specify a departure date in the format YYYY-MM-DD UTC')
-    }
-    
-    if(dep_date != '' && dep_time != '' && seconds < min_secs) {
-        stop('The departure time has to be some time in the future!')
-    }
-    
-    # convert arrival time to seconds after January 1, 1970, 00:00:00 UCT
-    if(arr_date != '' && arr_time != '') {
-        arriv = strptime(paste(arr_date, arr_time), '%Y-%m-%d %H:%M:%OS', tz='GMT')
-        seconds_arrival = round(as.numeric(difftime(arriv, UTCtime, units = 'secs')))
-    }
-    
-    if(arrival != '') {
-        seconds_arrival = arrival
-    }
-    
-    if(arrival != '' && arrival < min_secs) {
-        stop('The arrival time has to be some time in the future!')
-    }
-    
-    if(arr_date != '' && arr_time == '') {
-        stop('You should also specify an arrival time in the format HH:MM:SS UTC')
-    }
-    
-    if(arr_date == '' && arr_time != '') {
-        stop('You should also specify an arrival date in the format YYYY-MM-DD UTC')
-    }
-    
-    if(arr_date != '' && arr_time != '' && seconds_arrival < min_secs) {
-        stop('The arrival time has to be some time in the future!')
-    }
-    
-    if((dep_date != '' || dep_time != '' || departure != 'now') && (arr_date != '' || arr_time != '' || arrival != '')) {
-        stop('Cannot input departure and arrival times. Only one can be used at a time. ')
-    }
-    
     ####################################################################################################################
     
-    data = data.frame('or' = origin, 'de' = destination)
-    n    = dim(data)
-    n    = n[1]
-    
-    data$Time     = NA
-    data$Distance = NA
-    data$status   = 'OK'
-    avoidmsg      = ''
-    
-    if(avoid != '') {
-        avoidmsg = paste0('&avoid=', avoid)
-    }
+    data = data.frame(Time = NA, Distance = NA, Status = '')
     
     # GENERATE REQUESTS ################################################################################################
     
@@ -133,9 +54,8 @@ gmapsdirection = function(origin, destination, waypoints = '', mode = 'driving',
                  '&waypoints=', waypoints,
                  '&mode=', mode,
                  '&units=metric',
-                 '&departure_time=', seconds,
-                 '&traffic_model=', traffic_model,
-                 avoidmsg)
+                 '&departure_time=', departure,
+                 '&traffic_model=', traffic_model)
     
     # if key is provided...
     if (!is.null(key)) {
@@ -156,10 +76,6 @@ gmapsdirection = function(origin, destination, waypoints = '', mode = 'driving',
     error_nodes  = webpageXML %>% xml_find_all("//error_message") %>% xml_text()
     status_nodes = webpageXML %>% xml_find_all("//status") %>% xml_text()
     
-    if (!length(error_nodes) == 0) {
-        stop(paste(c('Google Directions API returned an error: ', error_nodes), sep = ''))
-    }
-    
     if (status_nodes == 'REQUEST_DENIED') {
         set.api.key(NULL)
         data$Status = 'REQUEST_DENIED'
@@ -178,6 +94,12 @@ gmapsdirection = function(origin, destination, waypoints = '', mode = 'driving',
     }
     
     if(status_nodes == 'OK') {
+        if (!length(error_nodes) == 0) {
+            # stop(paste(c('Google Directions API returned an error: ', error_nodes), sep = ''))
+            data$Status = paste0('API_ERROR: ', error_nodes)
+        } else {
+            data$Status = 'OK'   
+        }
         data$Status    = 'OK'
         duration_nodes = webpageXML %>% xml_find_all("//route/leg/duration_in_traffic/value") %>% xml_integer()
         data$Time      = duration_nodes
@@ -190,7 +112,7 @@ gmapsdirection = function(origin, destination, waypoints = '', mode = 'driving',
     
     output = list(Time     = data$Time,
                   Distance = data$Distance,
-                  Status   = data$status)
+                  Status   = data$Status)
     
     ####################################################################################################################
     

@@ -1,0 +1,26 @@
+div.main-container {
+    max-width: 100% !important;
+}
+
+.toc-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+div.tocify {
+    width: 23% !important;
+    max-width: 23% !important;
+}
+
+h1.title {
+    font-weight: 700;
+}
+
+h2 {
+    font-weight: 700;
+}
+
+p {
+    font-size: larger;
+    max-width: 800px !important;
+}
